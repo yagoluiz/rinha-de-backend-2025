@@ -1,10 +1,9 @@
 (defproject rinha-de-backend-2025 "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
-  :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
-            :url "https://www.eclipse.org/legal/epl-2.0/"}
-  :dependencies [[org.clojure/clojure "1.11.1"]]
-  :main ^:skip-aot rinha-de-backend-2025.core
+  :description "Rinha de Backend 2025"
+  :url "https://github.com/yagoluiz/rinha-de-backend-2025"
+  :dependencies [[org.clojure/clojure "1.12.1"]]
+  :source-paths ["src"]
+  :main ^:skip-aot rinha-de-backend-2025.main
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all
-                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}})
+  :profiles {:dev     {:dependencies [[nrepl "1.3.1"]]}
+             :uberjar {:aot :all}})
