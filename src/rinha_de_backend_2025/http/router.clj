@@ -3,11 +3,11 @@
             [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
             [rinha-de-backend-2025.http.handlers :as handlers]))
 
-(def middlewares
+(def ^:private middlewares
   [wrap-json-body
    wrap-json-response])
 
-(def routes
+(def ^:private routes
   [["/payments" {:post handlers/payment-request}]])
 
 (defn app-handler []
