@@ -4,7 +4,7 @@
             [rinha-de-backend-2025.http.handlers :as handlers]))
 
 (def ^:private middlewares
-  [wrap-json-body
+  [[wrap-json-body {:keywords? true}]
    wrap-json-response])
 
 (def ^:private routes

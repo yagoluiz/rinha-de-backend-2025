@@ -4,5 +4,4 @@
 (defn payment-request [req]
   (let [payment (:body req)]
     (processor/producer payment)
-    {:status 202
-     :body   {:payment payment}}))
+    {:status 202}))
