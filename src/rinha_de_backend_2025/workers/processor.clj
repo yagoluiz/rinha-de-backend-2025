@@ -1,5 +1,5 @@
 (ns rinha-de-backend-2025.workers.processor
-  (:require [clojure.core.async :refer [chan go go-loop pipeline-async >! <! put!]]
+  (:require [clojure.core.async :refer [<! >! chan go go-loop pipeline-async put!]]
             [cheshire.core :as json]
             [org.httpkit.client :as http]
             [rinha-de-backend-2025.config :as config])
@@ -11,8 +11,10 @@
 (defn producer [payment]
   (go (>! job-chan payment)))
 
-(defn ^:private send-payment [payment callback]
-  (let [processor-url (config/processor-default-url)
+(defn ^:private attempt-payment [payment processor callback]
+  (let [processor-url (if (= processor :processor-default)
+                        (config/processor-default-url)
+                        (config/processor-fallback-url))
         payment-url   (str processor-url "/payments")
         requested-at  (str (Instant/now))
         payload       {:correlationId (:correlationId payment)
@@ -22,25 +24,26 @@
                    :method  :post
                    :headers {"Content-Type" "application/json"}
                    :body    (json/generate-string payload)}
-                  (fn [{:keys [status error body]}]
+                  (fn [{:keys [status]}]
                     (let [success? (= status 200)
-                          result   (if success?
-                                     {:success true :response body}
-                                     {:success false :reason (or error (str "HTTP " status))})]
+                          details  (-> payload
+                                       (assoc :processor processor))
+                          result   {:success success? :details details}]
                       (callback result))))))
 
 (defn ^:private process-payment [payment _]
-  (send-payment payment
-                (fn [result]
-                  (let [processed-payment (if (:success result)
-                                            (-> payment
-                                                (assoc :status :success)
-                                                (assoc :response (:response result)))
-                                            (-> payment
-                                                (assoc :status :failed)
-                                                (assoc :error (:reason result))))]
-                    (println "Processed payment =>" processed-payment)
-                    (put! out-chan processed-payment)))))
+  (let [primary-processor  :processor-default
+        fallback-processor :processor-fallback]
+    (attempt-payment payment
+                     primary-processor
+                     (fn [default-result]
+                       (if (:success default-result)
+                         (put! out-chan default-result)
+                         (attempt-payment payment
+                                          fallback-processor
+                                          (fn [fallback-result]
+                                            (when (:success fallback-result)
+                                              (put! out-chan fallback-result)))))))))
 
 (defn start-consumers [total-consumers]
   (pipeline-async total-consumers out-chan process-payment job-chan)
