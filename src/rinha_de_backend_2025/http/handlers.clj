@@ -1,6 +1,6 @@
 (ns rinha-de-backend-2025.http.handlers
-  (:require [rinha-de-backend-2025.workers.processor :as processor])
-  (:import (java.time Instant)))
+  (:require [rinha-de-backend-2025.db.payments :as db]
+            [rinha-de-backend-2025.workers.processor :as processor]))
 
 (defn payment-request! [request]
   (let [payment (:body request)]
@@ -8,8 +8,7 @@
     {:status 202}))
 
 (defn payment-summary! [request]
-  (let [params (:params request)
-        from   (Instant/parse (:from params))
-        to     (Instant/parse (:to params))
-        _      (println "Payment summary request from" from "to" to)]
-    {:status 200}))
+  (let [{:keys [from to]} (:params request)
+        response (db/find-summary! from to)]
+    {:status 200
+     :body   response}))

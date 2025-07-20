@@ -31,3 +31,26 @@
         :processor      (str->enum (:processor details))
         :requested_at   (instant->timestamp (:requestedAt details))}
        (sql/insert! datasource :payments)))
+
+(defn ^:private summary-row->map [{:keys [processor total_requests total_amount]}]
+  [(keyword processor)
+   {:totalRequests total_requests
+    :totalAmount total_amount}])
+
+(defn find-summary! [from to]
+  (let [query   "WITH filtered_payments AS (
+                  SELECT processor, amount
+                  FROM payments
+                  WHERE requested_at BETWEEN ? AND ?
+                )
+                SELECT
+                  processor,
+                  COUNT(*) AS total_requests,
+                  SUM(amount) AS total_amount
+                FROM filtered_payments
+                GROUP BY processor"
+        results (jdbc/execute! datasource [query (instant->timestamp from) (instant->timestamp to)]
+                               {:builder-fn next.jdbc.result-set/as-unqualified-maps})]
+    (->> results
+         (map summary-row->map)
+         (into {}))))
