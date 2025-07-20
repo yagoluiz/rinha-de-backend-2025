@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:17.5-alpine
+    container_name: postgres-db
+    hostname: postgres-db
+    environment:
+      POSTGRES_DB: rinha_backend
+      POSTGRES_HOST: postgres-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - backend
+
+networks:
+  backend:
+    name: backend
+    driver: bridge

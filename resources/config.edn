@@ -1,3 +1,8 @@
 {:server-port            "9999"
  :processor-default-url  "http://localhost:8001"
- :processor-fallback-url "http://localhost:8002"}
+ :processor-fallback-url "http://localhost:8002"
+ :postgres-db            "rinha_backend"
+ :postgres-host          "localhost"
+ :postgres-port          "5432"
+ :postgres-user          "postgres"
+ :postgres-password      "postgres"}

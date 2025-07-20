@@ -20,3 +20,19 @@
 
 (defn processor-fallback-url []
   (env-or-edn "PROCESSOR_FALLBACK_URL" :processor-fallback-url))
+
+(defn postgres-db []
+  (env-or-edn "POSTGRES_DB" :postgres-db))
+
+(defn postgres-host []
+  (env-or-edn "POSTGRES_HOST" :postgres-host))
+
+(defn postgres-port []
+  (-> (env-or-edn "POSTGRES_PORT" :postgres-port)
+      Integer/parseInt))
+
+(defn postgres-user []
+  (env-or-edn "POSTGRES_USER" :postgres-user))
+
+(defn postgres-password []
+  (env-or-edn "POSTGRES_PASSWORD" :postgres-password))
