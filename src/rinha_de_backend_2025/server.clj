@@ -3,14 +3,14 @@
             [rinha-de-backend-2025.http.router :as router]
             [rinha-de-backend-2025.config :as config]))
 
-(defonce server (atom nil))
+(defonce ^:private server (atom nil))
 
-(defn start-server []
+(defn start-server! []
   (reset! server (http-server/run-server
                    (router/app-handler)
                    {:port (config/server-port)})))
 
-(defn stop-server []
+(defn stop-server! []
   (when @server
     (@server)
     (reset! server nil)))

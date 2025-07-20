@@ -8,7 +8,7 @@
    wrap-json-response])
 
 (def ^:private routes
-  [["/payments" {:post handlers/payment-request}]])
+  [["/payments" {:post handlers/payment-request!}]])
 
 (defn app-handler []
   (ring/ring-handler

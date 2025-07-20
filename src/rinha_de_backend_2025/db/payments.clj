@@ -6,7 +6,7 @@
            (java.time Instant)
            (org.postgresql.util PGobject)))
 
-(defonce datasource
+(defonce ^:private datasource
          (jdbc/get-datasource
            {:dbtype   "postgresql"
             :dbname   (config/postgres-db)
@@ -25,7 +25,7 @@
       Instant/parse
       Timestamp/from))
 
-(defn insert [{:keys [details]}]
+(defn insert! [{:keys [details]}]
   (->> {:correlation_id (parse-uuid (:correlationId details))
         :amount         (:amount details)
         :processor      (str->enum (:processor details))

@@ -4,5 +4,5 @@
   (:gen-class))
 
 (defn -main [& _]
-  (processor/start-consumers 4)
-  (server/start-server))
+  (processor/start-consumers! 4)
+  (server/start-server!))

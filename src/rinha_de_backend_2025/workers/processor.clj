@@ -9,10 +9,10 @@
 (def ^:private job-chan (chan 100))
 (def ^:private out-chan (chan 100))
 
-(defn producer [payment]
+(defn producer! [payment]
   (go (>! job-chan payment)))
 
-(defn ^:private attempt-payment [payment processor callback]
+(defn ^:private attempt-payment! [payment processor callback]
   (let [processor-url (if (= processor :default)
                         (config/processor-default-url)
                         (config/processor-fallback-url))
@@ -33,30 +33,30 @@
                           result   {:success success? :details details}]
                       (callback result))))))
 
-(defn ^:private process-payment [payment _]
+(defn ^:private process-payment! [payment _]
   (let [primary-processor  :default
         fallback-processor :fallback]
-    (attempt-payment payment
-                     primary-processor
-                     (fn [default-result]
-                       (if (:success default-result)
-                         (put! out-chan default-result)
-                         (attempt-payment payment
-                                          fallback-processor
-                                          (fn [fallback-result]
-                                            (when (:success fallback-result)
-                                              (put! out-chan fallback-result)))))))))
+    (attempt-payment! payment
+                      primary-processor
+                      (fn [default-result]
+                        (if (:success default-result)
+                          (put! out-chan default-result)
+                          (attempt-payment! payment
+                                            fallback-processor
+                                            (fn [fallback-result]
+                                              (when (:success fallback-result)
+                                                (put! out-chan fallback-result)))))))))
 
-(defn ^:private persist-payment []
+(defn ^:private persist-payment! []
   (go-loop []
     (when-let [result (<! out-chan)]
       (thread
         (try
-          (db/insert result)
+          (db/insert! result)
           (catch Exception e
             (println "Error inserting payment result into database =>" e))))
       (recur))))
 
-(defn start-consumers [total-consumers]
-  (pipeline-async total-consumers out-chan process-payment job-chan)
-  (persist-payment))
+(defn start-consumers! [total-consumers]
+  (pipeline-async total-consumers out-chan process-payment! job-chan)
+  (persist-payment!))
