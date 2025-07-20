@@ -12,3 +12,7 @@
         response (db/find-summary! from to)]
     {:status 200
      :body   response}))
+
+(defn purge-payments! [_]
+  (db/purge!)
+  {:status 204})

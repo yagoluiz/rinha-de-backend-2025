@@ -54,3 +54,7 @@
     (->> results
          (map summary-row->map)
          (into {}))))
+
+(defn purge! []
+  (->> ["TRUNCATE TABLE payments RESTART IDENTITY"]
+       (jdbc/execute! datasource)))

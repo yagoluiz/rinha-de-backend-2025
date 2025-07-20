@@ -16,7 +16,10 @@
     {:get        handlers/payment-summary!
      :middleware (conj common-middlewares
                        [wrap-params]
-                       [wrap-keyword-params])}]])
+                       [wrap-keyword-params])}]
+   ["/purge-payments"
+    {:delete     handlers/purge-payments!
+     :middleware common-middlewares}]])
 
 (defn app-handler []
   (ring/ring-handler
