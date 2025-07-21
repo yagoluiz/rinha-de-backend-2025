@@ -13,5 +13,6 @@
   :source-paths ["src"]
   :main ^:skip-aot rinha-de-backend-2025.main
   :target-path "target/%s"
+  :uberjar-name "app.jar"
   :profiles {:dev     {:dependencies [[nrepl "1.3.1"]]}
              :uberjar {:aot :all}})

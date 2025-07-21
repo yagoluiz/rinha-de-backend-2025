@@ -1,4 +1,4 @@
-.PHONY: run-db stop-db logs-db run-adminer stop-adminer run-compose down-compose logs-compose-db
+.PHONY: run-db stop-db logs-db run-adminer stop-adminer run-compose down-compose logs-compose-db logs-compose-api-01 logs-compose-api-02
 
 run-db:
 	docker run --name postgres-db \
@@ -27,10 +27,16 @@ stop-adminer:
 	docker rm -f adminer || true
 
 run-compose:
-	docker-compose build && docker-compose up -d
+	docker-compose up -d --build
 
 down-compose:
 	docker-compose down
 
 logs-compose-db:
 	docker-compose logs -f db
+
+logs-compose-api-01:
+	docker-compose logs -f api-01
+
+logs-compose-api-02:
+	docker-compose logs -f api-02

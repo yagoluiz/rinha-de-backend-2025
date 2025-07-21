@@ -1,3 +1,18 @@
+x-service-templates:
+  api: &api
+    build: .
+    expose:
+      - "9999"
+    depends_on:
+      - db
+    environment:
+      PROCESSOR_DEFAULT_URL: http://payment-processor-default:8080
+      PROCESSOR_FALLBACK_URL: http://payment-processor-fallback:8080
+      POSTGRES_HOST: postgres-db
+    networks:
+      - backend
+      - payment-processor
+
 services:
   db:
     image: postgres:17.5-alpine
@@ -5,17 +20,33 @@ services:
     hostname: postgres-db
     environment:
       POSTGRES_DB: rinha_backend
-      POSTGRES_HOST: postgres-db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
-      - ./init:/docker-entrypoint-initdb.d/init.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - backend
+
+  api-01:
+    <<: *api
+    container_name: api-01
+    hostname: api-01
+    ports:
+      - "9991:9999"
+
+  api-02:
+    <<: *api
+    container_name: api-02
+    hostname: api-02
+    ports:
+      - "9992:9999"
 
 networks:
   backend:
     name: backend
     driver: bridge
+  payment-processor:
+    name: payment-processor
+    external: true
