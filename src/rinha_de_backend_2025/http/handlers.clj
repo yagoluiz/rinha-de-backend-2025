@@ -15,4 +15,4 @@
 
 (defn purge-payments! [_]
   (db/purge!)
-  {:status 204})
+  {:status 200})

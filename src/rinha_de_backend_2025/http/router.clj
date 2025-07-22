@@ -18,10 +18,10 @@
                        [wrap-params]
                        [wrap-keyword-params])}]
    ["/purge-payments"
-    {:delete     handlers/purge-payments!
+    {:post       handlers/purge-payments!
      :middleware common-middlewares}]])
 
 (defn app-handler []
   (ring/ring-handler
-    (ring/router routes)
-    ring/create-default-handler))
+   (ring/router routes)
+   ring/create-default-handler))
