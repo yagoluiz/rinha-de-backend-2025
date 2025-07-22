@@ -51,10 +51,10 @@
   (go-loop []
     (when-let [result (<! out-chan)]
       (thread
-        (try
-          (db/insert! result)
-          (catch Exception e
-            (println "Error inserting payment result into database =>" e))))
+       (try
+         (db/insert! result)
+         (catch Exception e
+           (println "Error inserting payment result into database =>" e))))
       (recur))))
 
 (defn start-consumers! [total-consumers]

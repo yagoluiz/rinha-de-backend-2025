@@ -7,8 +7,8 @@
 
 (defn start-server! []
   (reset! server (http-server/run-server
-                   (router/app-handler)
-                   {:port (config/server-port)})))
+                  (router/app-handler)
+                  {:port (config/server-port)})))
 
 (defn stop-server! []
   (when @server
