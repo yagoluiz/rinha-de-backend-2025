@@ -8,12 +8,12 @@
 
 (defonce ^:private datasource
          (jdbc/get-datasource
-           {:dbtype   "postgresql"
-            :dbname   (config/postgres-db)
-            :host     (config/postgres-host)
-            :port     (config/postgres-port)
-            :user     (config/postgres-user)
-            :password (config/postgres-password)}))
+          {:dbtype   "postgresql"
+           :dbname   (config/postgres-db)
+           :host     (config/postgres-host)
+           :port     (config/postgres-port)
+           :user     (config/postgres-user)
+           :password (config/postgres-password)}))
 
 (defn ^:private str->enum [processor]
   (doto (PGobject.)
@@ -35,25 +35,31 @@
 (defn ^:private summary-row->map [{:keys [processor total_requests total_amount]}]
   [(keyword processor)
    {:totalRequests total_requests
-    :totalAmount total_amount}])
+    :totalAmount   total_amount}])
 
 (defn find-summary! [from to]
-  (let [query   "WITH filtered_payments AS (
-                  SELECT processor, amount
-                  FROM payments
-                  WHERE requested_at BETWEEN ? AND ?
-                )
-                SELECT
-                  processor,
-                  COUNT(*) AS total_requests,
-                  SUM(amount) AS total_amount
-                FROM filtered_payments
-                GROUP BY processor"
-        results (jdbc/execute! datasource [query (instant->timestamp from) (instant->timestamp to)]
-                               {:builder-fn next.jdbc.result-set/as-unqualified-maps})]
-    (->> results
-         (map summary-row->map)
-         (into {}))))
+  (let [query          "WITH filtered_payments AS (
+                          SELECT processor, amount
+                          FROM payments
+                          WHERE requested_at BETWEEN ? AND ?
+                       )
+                       SELECT
+                         processor,
+                         COUNT(*) AS total_requests,
+                         SUM(amount) AS total_amount
+                       FROM filtered_payments
+                       GROUP BY processor"
+        from-ts        (instant->timestamp from)
+        to-ts          (instant->timestamp to)
+        results        (jdbc/execute! datasource [query from-ts to-ts]
+                                      {:builder-fn next.jdbc.result-set/as-unqualified-maps})
+        summary        (->> results
+                            (map summary-row->map)
+                            (into {}))
+        default-values {:totalRequests 0 :totalAmount 0}]
+    (-> summary
+        (update :default #(or % default-values))
+        (update :fallback #(or % default-values)))))
 
 (defn purge! []
   (->> ["TRUNCATE TABLE payments RESTART IDENTITY"]
